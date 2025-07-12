@@ -78,7 +78,7 @@ static int mainBody(int argc, const char *argv[])
 #endif // ENABLE_OGRE_CLASS
 
 #ifdef ENABLE_RMLUI_CONTEXT
-    SDL_GL_MakeCurrent(window.get(), rmluiContext.get()); // <-- this seems to eventually cause Ogre Next to crash in the game.draw() call!
+    SDL_GL_MakeCurrent(window.get(), rmluiContext.get());
 #endif // ENABLE_RMLUI_CONTEXT
 #ifdef ENABLE_RMLUI_CLASS
     GUI gui(window.get());
@@ -88,7 +88,7 @@ static int mainBody(int argc, const char *argv[])
 
     bool showingGui = true;
     int guiMouseX = 0, guiMouseY = 0;
-    SDL_ShowCursor(SDL_DISABLE); // TODO maybe move this further up?
+    // SDL_ShowCursor(SDL_DISABLE); // TODO maybe move this further up?
     while (
 #ifdef ENABLE_OGRE_CLASS
         !game.getQuit() &&

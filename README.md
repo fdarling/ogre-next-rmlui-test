@@ -4,6 +4,10 @@ This is a demo project that is attempting to integrate the 3D graphics library O
 
 The project is written in C++ using CMake as the build system, and has been tested on Debian 12 (bookworm) Linux. Currently, some X11 specific code is being used to pass the window "handle" from SDL2 to Ogre, but besides that it should be relatively cross-platform because of using SDL2 and OpenGL.
 
+# Screenshot
+
+<img alt="Ogre Next with RmlUi menu screenshot" src="https://github.com/user-attachments/assets/439eae31-c8f8-4c29-8877-a00c111026ee" />
+
 # Dependencies
 
 * [CMake](https://gitlab.kitware.com/cmake/cmake) (tested with v3.25.1)

@@ -109,6 +109,10 @@ cmake ..
 ./OgreNextRmlUiDemo
 ```
 
+* <kbd>TAB</kbd> to toggle between the RmlUi main menu and the game in mouselook mode
+* <kbd>F8</kbd> to toggle RmlUi's debugger
+* <kbd>ESC</kbd> to quit the program
+
 NOTE: it is assumed that you are inside of a `build` type directory within the main project folder, therefore you can access assets using a relative path `../data` and `../assets`:
 
 NOTE: it is assumed that Ogre Next was installed to `~/apps/ogre-next`, and this project builds that path using the Linux APIs to get the home directory location.

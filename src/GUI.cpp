@@ -67,6 +67,10 @@ void GUI::handleEvent(const SDL_Event &event)
     {
         toggleDebug();
     }
+    if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)
+    {
+        mQuit = true;
+    }
     else if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
     {
         const Rml::Vector2i dimensions = {event.window.data1, event.window.data2};

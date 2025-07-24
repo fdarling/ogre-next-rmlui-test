@@ -15,6 +15,7 @@ The project is written in C++ using CMake as the build system, and has been test
 * [Ogre Next](https://github.com/OGRECave/ogre-next) v4.0 (v3.0 might also work?)
 * [RmlUi](https://github.com/mikke89/RmlUi) (tested with v6.1)
 * [SDL2](https://github.com/libsdl-org/SDL) (tested with v2.26.5)
+* [SDL2_image](https://github.com/libsdl-org/SDL_image) (tested with v2.6.3)
 * [Open Asset Import Library](https://github.com/assimp/assimp) aka "assimp" (tested with v5.2.5)
 
 ## Ogre Next
@@ -50,19 +51,22 @@ cmake --build . --config Release --target install
 
 ## RmlUi
 
+NOTE: these steps are optional, if you don't have RmlUi installed and setup to be found by CMake, it will default to using the submodule copy. The down-side of that method is it will build RmlUi everytime you clean this project...
+
 Clone the git repository:
 
 ```
 git clone --recursive https://github.com/mikke89/RmlUi.git
 ```
 
-Build it:
+Build and install using `cmake`:
 
 ```
 cd RmlUi
 mkdir build
 cd build
-cmake .. --preset samples -DRMLUI_BACKEND=SDL_GL3
+cmake .. -DRMLUI_BACKEND=SDL_GL3 -DCMAKE_INSTALL_PREFIX=~/apps/RmlUi -DBUILD_SHARED_LIBS=0
+cmake --build . --config Release --target install
 ```
 
 ## Open Asset Import Library
@@ -83,18 +87,14 @@ sudo apt install libsdl2-dev
 
 # Compiling
 
-First, you must edit some hard-coded paths in `CMakeLists.txt` to point to the installed Ogre Next and to the built (but not installed) RmlUi:
+First, you must edit some hard-coded paths in `CMakeLists.txt` to point to the installed Ogre Next, and optionally an installed RmlUi:
 
 ```cmake
 list(APPEND CMAKE_PREFIX_PATH "/home/USERNAME/apps/ogre-next")
 list(APPEND CMAKE_MODULE_PATH "/home/USERNAME/apps/ogre-next/lib/OGRE-Next/cmake/")
-list(APPEND CMAKE_PREFIX_PATH "/home/USERNAME/repos/RmlUi/build")
-list(APPEND CMAKE_MODULE_PATH "/home/USERNAME/repos/RmlUi/build/install/")
-
-set(RmlUi_DIR /home/USERNAME/repos/ext/RmlUi/build)
-if(RmlUi_STATIC)
-  set(RmlUi_STATIC /home/USERNAME/repos/RmlUi/build/lib)
-endif()
+# NOTE: these are only necessary if using an installed RmlUi (can be a good idea if sharing it among projects)
+list(APPEND CMAKE_PREFIX_PATH "/home/USERNAME/apps/RmlUi/")
+list(APPEND CMAKE_MODULE_PATH "/home/USERNAME/apps/RmlUi/lib/cmake/")
 ```
 
 NOTE: you must "hard-code" the paths and not use the tilde (~) symbol, as it doesn't always evaluate properly.
@@ -105,6 +105,7 @@ Then you should be able to build this repository:
 mkdir build
 cd build
 cmake ..
+cmake --build .
 ```
 
 # Running

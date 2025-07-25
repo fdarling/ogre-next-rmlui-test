@@ -12,7 +12,16 @@
 
 #include <iostream>
 
-GUI::GUI(SDL_Window *window) : mQuit(false), mWindow(window), mSystemInterface(nullptr), mRenderInterface(nullptr)
+namespace GUI {
+
+GUI::GUI(SDL_Window *window) :
+    mQuit(false),
+    mWindow(window),
+    mSystemInterface(nullptr),
+    mRenderInterface(nullptr),
+    mContext(nullptr),
+    _frameStatsDocument(nullptr),
+    _mainMenuDocument(nullptr)
 {
     // SDL_GL_MakeCurrent(window, ceguiContext);
     int w = 0, h = 0;
@@ -36,12 +45,29 @@ GUI::GUI(SDL_Window *window) : mQuit(false), mWindow(window), mSystemInterface(n
     // Rml::Debugger::SetVisible(true);
 
     Rml::LoadFontFace("assets/LatoLatin-Regular.ttf");
+    
+    {
+        Rml::DataModelConstructor constructor = mContext->CreateDataModel("frame_stats");
+        if (!constructor)
+            return; // TODO handle error
 
-    Rml::ElementDocument * const document = mContext->LoadDocument("data/ui.rml");
-    if (document)
-        document->Show();
-    else
-        std::cout << "ERROR: couldn't load the RmlUi document!" << std::endl;
+        constructor.Bind("fps", &_frameStatData.fps);
+        constructor.Bind("avgTime", &_frameStatData.avgTime);
+        constructor.Bind("bestTime", &_frameStatData.bestTime);
+        constructor.Bind("worstTime", &_frameStatData.worstTime);
+        constructor.Bind("faceCount", &_frameStatData.faceCount);
+        constructor.Bind("vertexCount", &_frameStatData.vertexCount);
+
+        _frameStatModel = constructor.GetModelHandle();
+    }
+
+    // TODO handle errors
+    _frameStatsDocument = mContext->LoadDocument("data/frame_stats.rml");
+    _mainMenuDocument = mContext->LoadDocument("data/ui.rml");
+    if (_frameStatsDocument)
+        _frameStatsDocument->Show();
+    if (_mainMenuDocument)
+        _mainMenuDocument->Show();
 }
 
 GUI::~GUI()
@@ -94,3 +120,5 @@ void GUI::toggleDebug()
 {
     Rml::Debugger::SetVisible(!Rml::Debugger::IsVisible());
 }
+
+} // namespace GUI

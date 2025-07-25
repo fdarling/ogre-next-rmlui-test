@@ -142,6 +142,7 @@ FPSGame::FPSGame(SDL_Window *sdlWindow) :
 
     // Initialize Root
     mRoot->getRenderSystem()->setConfigOption("sRGB Gamma Conversion", "Yes");
+    mRoot->getRenderSystem()->setMetricsRecordingEnabled(true);
     mRoot->initialise(false, "MyFPSGame");
     // mWindow = mRoot->initialise(true, "MyFPSGame");
 
@@ -385,8 +386,6 @@ void FPSGame::_CreateScene()
     compositorManager->createBasicWorkspaceDef(workspaceName, backgroundColour, Ogre::IdString());
     compositorManager->addWorkspace(mSceneManager, mWindow->getTexture(), mCamera, workspaceName, true);
 
-
-
 #if 0
     // Ogre::HlmsUnlit * const hlmsUnlit = static_cast<Ogre::HlmsUnlit *>(mRoot->getHlmsManager()->getHlms(Ogre::HLMS_UNLIT));
     Ogre::HlmsPbs * const hlmsUnlit = static_cast<Ogre::HlmsPbs *>(mRoot->getHlmsManager()->getHlms(Ogre::HLMS_PBS));
@@ -467,6 +466,5 @@ void FPSGame::_CreateScene()
     lightNode->setPosition(10, 10, 10);
 #endif
 
-    // loadSceneWithAssimp("../data/test_scene.dae", mSceneManager, mSceneManager->getRootSceneNode());
     loadSceneWithAssimp("../data/test_scene.glb", mSceneManager, mSceneManager->getRootSceneNode());
 }

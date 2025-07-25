@@ -1,14 +1,13 @@
 #define ENABLE_RMLUI_CONTEXT
-#define ENABLE_RMLUI_CLASS
-#define ENABLE_OGRE_CONTEXT
-#define ENABLE_OGRE_CLASS
 
 #include "FPSGame.h"
-#ifdef ENABLE_RMLUI_CLASS
 #include "GUI.h"
-#endif // ENABLE_RMLUI_CLASS
 
-// #include <OgreWindowEventUtilities.h>
+#include <OgreRoot.h>
+#include <OgreFrameStats.h>
+
+#include <RmlUi/Core/EventListener.h>
+#include <RmlUi/Core/ElementDocument.h>
 
 #include <SDL.h>
 #include <SDL_opengl.h>
@@ -19,6 +18,23 @@
 
 static const int WINDOW_WIDTH = 1280;
 static const int WINDOW_HEIGHT = 720;
+
+class ResetEventListener : public Rml::EventListener
+{
+public:
+    ResetEventListener() : resetClicked(false)
+    {
+    }
+    void ProcessEvent(Rml::Event &event) override
+    {
+        std::cout << "Reset clicked!" << std::endl;
+        resetClicked = true;
+        Ogre::Root * const root = Ogre::Root::getSingletonPtr();
+        root->resetFrameStats();
+    }
+public:
+    bool resetClicked;
+};
 
 static int mainBody(int argc, const char *argv[])
 {
@@ -59,30 +75,28 @@ static int mainBody(int argc, const char *argv[])
 #endif // ENABLE_RMLUI_CONTEXT
 
     // create an OpenGL context for OGRE
-#ifdef ENABLE_OGRE_CONTEXT
     std::unique_ptr<std::remove_pointer<SDL_GLContext>::type, decltype(&SDL_GL_DeleteContext)> ogreContext(SDL_GL_CreateContext(window.get()), SDL_GL_DeleteContext);
     if (!ogreContext)
     {
         fprintf(stderr, "error: SDL_GL_CreateContext() failed for OGRE: %s\n", SDL_GetError());
         return EXIT_FAILURE;
     }
-#endif // ENABLE_OGRE_CONTEXT
 
-#ifdef ENABLE_OGRE_CONTEXT
     SDL_GL_MakeCurrent(window.get(), ogreContext.get());
-#endif // ENABLE_OGRE_CONTEXT
-#ifdef ENABLE_OGRE_CLASS
     FPSGame game(window.get());
     if (!game.getWindow())
         return EXIT_FAILURE;
-#endif // ENABLE_OGRE_CLASS
 
 #ifdef ENABLE_RMLUI_CONTEXT
     SDL_GL_MakeCurrent(window.get(), rmluiContext.get());
 #endif // ENABLE_RMLUI_CONTEXT
-#ifdef ENABLE_RMLUI_CLASS
-    GUI gui(window.get());
-#endif // ENABLE_RMLUI_CLASS
+    GUI::GUI gui(window.get());
+    ResetEventListener resetEventListener;
+    if (Rml::ElementDocument * const document = gui.getFrameStatsDocument())
+    {
+        if (Rml::Element * const element = gui.getFrameStatsDocument()->GetElementById("resetButton"))
+            element->AddEventListener(Rml::EventId::Click, &resetEventListener);
+    }
 
     Uint64 old_ticks = SDL_GetTicks64();
 
@@ -90,12 +104,8 @@ static int mainBody(int argc, const char *argv[])
     int guiMouseX = 0, guiMouseY = 0;
     // SDL_ShowCursor(SDL_DISABLE); // TODO maybe move this further up?
     while (
-#ifdef ENABLE_OGRE_CLASS
         !game.getQuit() &&
-#endif // ENABLE_OGRE_CLASS
-#ifdef ENABLE_RMLUI_CLASS
         !gui.getQuit() &&
-#endif // ENABLE_RMLUI_CLASS
         !SDL_QuitRequested())
     {
         // calculate time delta
@@ -103,17 +113,11 @@ static int mainBody(int argc, const char *argv[])
         const float seconds_elapsed = static_cast<float>(new_ticks - old_ticks)/1000.0f;
         old_ticks = new_ticks;
 
-        // Ogre::WindowEventUtilities::messagePump();
-
         // process input / window events
         SDL_Event event;
         while (SDL_PollEvent(&event) &&
-#ifdef ENABLE_OGRE_CLASS
             !game.getQuit() &&
-#endif // ENABLE_OGRE_CLASS
-#ifdef ENABLE_RMLUI_CLASS
             !gui.getQuit() &&
-#endif // ENABLE_RMLUI_CLASS
             !SDL_QuitRequested())
         {
             if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_TAB)
@@ -129,45 +133,65 @@ static int mainBody(int argc, const char *argv[])
                     // SDL_ShowCursor(SDL_DISABLE);
                     SDL_WarpMouseInWindow(window.get(), guiMouseX, guiMouseY);
                 }
+                if (Rml::ElementDocument * const mainMenuDoc = gui.getMainMenuDocument())
+                {
+                    if (showingGui)
+                        mainMenuDoc->Show();
+                    else
+                        mainMenuDoc->Hide();
+                }
             }
-#ifdef ENABLE_RMLUI_CLASS
             else if (showingGui)
             {
                 gui.handleEvent(event);
             }
             else
-#endif // ENABLE_RMLUI_CLASS
             {
-#ifdef ENABLE_OGRE_CLASS
                 game.handleEvent(event);
-#endif // ENABLE_OGRE_CLASS
             }
         }
 
-#ifdef ENABLE_OGRE_CLASS
         game.advance(seconds_elapsed);
-#endif // ENABLE_OGRE_CLASS
-#ifdef ENABLE_RMLUI_CLASS
+        //if (showingGui) // TODO why do things go strangely if I don't guard this?
+        {
+            static int counter;
+            counter++;
+            if (counter == 20)
+            {
+                counter = 0;
+                GUI::FrameStatData &data = gui.getFrameStatData();
+                Rml::DataModelHandle model = gui.getFrameStatModel();
+                Ogre::Root * const root = Ogre::Root::getSingletonPtr();
+                // root->resetFrameStats();
+                const Ogre::FrameStats * const frameStats = root->getFrameStats();
+                const Ogre::RenderingMetrics &renderingMetrics = root->getRenderSystem()->getMetrics();
+                const float fps = frameStats->getRollingAverageFps();
+                const float avgTime = (frameStats->getRollingAverage()*1000.0);
+                const float bestTime = (frameStats->getBestTime()*1000.0);
+                const float worstTime = (frameStats->getWorstTime()*1000.0);
+                data.fps = fps;
+                data.avgTime = avgTime;
+                data.bestTime = bestTime;
+                data.worstTime = worstTime;
+                data.faceCount = renderingMetrics.mFaceCount;
+                data.vertexCount = renderingMetrics.mVertexCount;
+                if (model)
+                    model.DirtyAllVariables();
+            }
+        }
         gui.advance(seconds_elapsed);
-#endif // ENABLE_RMLUI_CLASS
 
         // SDL_GL_MakeCurrent(window.get(), ogreContext.get());
         // glClear(GL_COLOR_BUFFER_BIT);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-#ifdef ENABLE_OGRE_CONTEXT
         SDL_GL_MakeCurrent(window.get(), ogreContext.get());
-#endif // ENABLE_OGRE_CONTEXT
-#ifdef ENABLE_OGRE_CLASS
         game.draw();
-#endif // ENABLE_OGRE_CLASS
-        if (showingGui)
+        // if (showingGui)
         {
 #ifdef ENABLE_RMLUI_CONTEXT
             SDL_GL_MakeCurrent(window.get(), rmluiContext.get());
 #endif // ENABLE_RMLUI_CONTEXT
-#ifdef ENABLE_RMLUI_CLASS
             gui.draw();
-#endif // ENABLE_RMLUI_CLASS
         }
         SDL_GL_SwapWindow(window.get());
     }

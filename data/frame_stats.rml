@@ -1,0 +1,69 @@
+<rml>
+    <head>
+		<title>Frame Stats</title>
+		<!-- <link type="text/template" href="../assets/window.rml" /> -->
+        <style>
+            body {
+                width: 12em;
+                font-family: LatoLatin;
+                color: white;
+                font-effect: outline(2px black);
+                font-size: 20dp;
+                white-space: nowrap
+            }
+            
+            h1, button {
+                display: block;
+                text-align: center;
+                margin: auto;
+            }
+            
+            table {
+                box-sizing: border-box;
+                display: table;
+            }
+            tr {
+                box-sizing: border-box;
+                display: table-row;
+            }
+            td {
+                box-sizing: border-box;
+                display: table-cell;
+                text-align: right;
+            }
+            td:first-child {
+                text-align: left;
+            }
+            col {
+                box-sizing: border-box;
+                display: table-column;
+            }
+            colgroup {
+                display: table-column-group;
+            }
+            thead, tbody, tfoot {
+                display: table-row-group;
+            }
+		</style>
+	</head>
+    <body>
+        <handle move_target="#document">
+            <h1>Frame Stats:</h1>
+		</handle>
+        <div data-model="frame_stats">
+            <table>
+                <col/>
+                <col/>
+                <tbody>
+                    <tr><td>FPS:</td><td>{{fps | format(3)}} FPS</td></tr>
+                    <tr><td>Avg. Time:</td><td>{{avgTime | format(3)}} ms</td></tr>
+                    <tr><td>Best Time:</td><td>{{bestTime | format(3)}} ms</td></tr>
+                    <tr><td>Worst Time:</td><td>{{worstTime | format(3)}} ms</td></tr>
+                    <tr><td>Face Count:</td><td>{{faceCount}}</td></tr>
+                    <tr><td>Vertex Count:</td><td>{{vertexCount}}</td></tr>
+                </tbody>
+            </table>
+            <button id="resetButton">Reset Stats</button>
+        </div>
+    </body>
+</rml>

@@ -18,6 +18,7 @@
 
 static const int WINDOW_WIDTH = 1280;
 static const int WINDOW_HEIGHT = 720;
+static const bool DISABLE_VSYNC = false;
 
 class ResetEventListener : public Rml::EventListener
 {
@@ -83,12 +84,16 @@ static int mainBody(int argc, const char *argv[])
     }
 
     SDL_GL_MakeCurrent(window.get(), ogreContext.get());
+    if (DISABLE_VSYNC)
+        SDL_GL_SetSwapInterval(0);
     FPSGame game(window.get());
     if (!game.getWindow())
         return EXIT_FAILURE;
 
 #ifdef ENABLE_RMLUI_CONTEXT
     SDL_GL_MakeCurrent(window.get(), rmluiContext.get());
+    if (DISABLE_VSYNC)
+        SDL_GL_SetSwapInterval(0);
 #endif // ENABLE_RMLUI_CONTEXT
     GUI::GUI gui(window.get());
     ResetEventListener resetEventListener;
@@ -198,7 +203,9 @@ static int mainBody(int argc, const char *argv[])
         // SDL_GL_MakeCurrent(window.get(), ogreContext.get());
         // glClear(GL_COLOR_BUFFER_BIT);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+#ifdef ENABLE_RMLUI_CONTEXT
         SDL_GL_MakeCurrent(window.get(), ogreContext.get());
+#endif // ENABLE_RMLUI_CONTEXT
         game.draw();
         // if (showingGui)
         {

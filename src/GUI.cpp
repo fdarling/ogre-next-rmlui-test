@@ -97,13 +97,13 @@ void GUI::handleEvent(const SDL_Event &event)
     {
         mQuit = true;
     }
-    else if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
-    {
-        const Rml::Vector2i dimensions = {event.window.data1, event.window.data2};
-        mRenderInterface->SetViewport(dimensions.x, dimensions.y);
-    }
     else
     {
+        if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
+        {
+            const Rml::Vector2i dimensions = {event.window.data1, event.window.data2};
+            mRenderInterface->SetViewport(dimensions.x, dimensions.y);
+        }
         SDL_Event eventCopy = event;
         RmlSDL::InputEventHandler(mContext, mWindow, eventCopy);
     }

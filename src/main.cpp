@@ -52,7 +52,7 @@ static int mainBody(int argc, const char *argv[])
             SDL_WINDOWPOS_CENTERED,
             WINDOW_WIDTH,
             WINDOW_HEIGHT,
-            SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL
+            SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE
         ),
         SDL_DestroyWindow
     );
@@ -141,9 +141,23 @@ static int mainBody(int argc, const char *argv[])
                         mainMenuDoc->Hide();
                 }
             }
+            else if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_RETURN && (event.key.keysym.mod & KMOD_CTRL))
+            {
+                const bool wasFullscreen = SDL_GetWindowFlags(window.get()) & SDL_WINDOW_FULLSCREEN;
+                const int displayIndex = SDL_GetWindowDisplayIndex(window.get());
+                SDL_DisplayMode desktopDisplayMode;
+                if (SDL_GetDesktopDisplayMode(displayIndex, &desktopDisplayMode) == 0)
+                {
+                    SDL_SetWindowDisplayMode(window.get(), &desktopDisplayMode);
+                }
+                SDL_SetWindowDisplayMode(window.get(), &desktopDisplayMode);
+                SDL_SetWindowFullscreen(window.get(), wasFullscreen ? 0 : SDL_WINDOW_FULLSCREEN);
+            }
             else if (showingGui)
             {
                 gui.handleEvent(event);
+                if (event.type == SDL_WINDOWEVENT)
+                    game.handleEvent(event);
             }
             else
             {

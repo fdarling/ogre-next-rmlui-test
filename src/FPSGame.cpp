@@ -294,6 +294,11 @@ void FPSGame::handleEvent(const SDL_Event &event)
             // mCaptureMouse = true;
             // _UpdateMouseCaptured();
         }
+        else if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
+        {
+            mWindow->requestResolution(event.window.data1, event.window.data2);
+            mWindow->windowMovedOrResized();
+        }
     }
 }
 

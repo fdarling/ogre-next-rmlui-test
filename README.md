@@ -115,6 +115,7 @@ cmake --build .
 ```
 
 * <kbd>TAB</kbd> to toggle between the RmlUi main menu and the game in mouselook mode
+* <kbd>CTRL</kbd>+<kbd>ENTER</kbd> to toggle fullscreen (uses monitor's current resolution for fullscreen mode)
 * <kbd>F8</kbd> to toggle RmlUi's debugger
 * <kbd>ESC</kbd> to quit the program
 
